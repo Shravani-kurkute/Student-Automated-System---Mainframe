@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher - Attendance | SAS</title>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      background: #f4f6fb;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #4c6ef5;
+      color: #fff;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+
+    .logo {
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .nav-links a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: #ffe066;
+    }
+
+    .logout-btn {
+      background: #fa5252;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      border: none;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .logout-btn:hover {
+      background: #e03131;
+    }
+
+    main {
+      flex: 1;
+      padding: 2rem;
+      max-width: 1100px;
+      margin: 2rem auto;
+      width: 100%;
+    }
+
+    h2 {
+      text-align: center;
+      color: #364fc7;
+      margin-bottom: 2rem;
+    }
+
+    .attendance-form {
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      margin-bottom: 2rem;
+    }
+
+    .attendance-form h3 {
+      color: #364fc7;
+      margin-bottom: 1rem;
+    }
+
+    .form-group {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    label {
+      flex: 1;
+      font-weight: 500;
+      min-width: 100px;
+    }
+
+    input, select {
+      flex: 2;
+      padding: 0.5rem;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      outline: none;
+      transition: 0.3s;
+    }
+
+    input:focus, select:focus {
+      border-color: #4c6ef5;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+      margin-top: 2rem;
+    }
+
+    th, td {
+      padding: 0.9rem;
+      text-align: center;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    th {
+      background: #f1f3f5;
+      color: #495057;
+      font-weight: 600;
+    }
+
+    tr:hover {
+      background: #f8f9fa;
+    }
+
+    .btn {
+      background: #4c6ef5;
+      color: #fff;
+      border: none;
+      padding: 0.7rem 1.4rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      background: #364fc7;
+    }
+
+    .btn:disabled {
+      background: #adb5bd;
+      cursor: not-allowed;
+    }
+
+    .chart-container {
+      background: #fff;
+      border-radius: 10px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      margin-top: 2rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      color: #777;
+      font-size: 0.9rem;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: #4c6ef5;
+    }
+
+    .message {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      text-align: center;
+      display: none;
+    }
+
+    .success {
+      background: #d3f9d8;
+      color: #2b8a3e;
+    }
+
+    .error {
+      background: #ffe0e0;
+      color: #c92a2a;
+    }
+
+    .status-present {
+      color: #2b8a3e;
+      font-weight: 600;
+    }
+
+    .status-absent {
+      color: #c92a2a;
+      font-weight: 600;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: #fff;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+
+    .stat-card h4 {
+      color: #4c6ef5;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-card p {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+      main {
+        padding: 1rem;
+      }
+      .form-group {
+        flex-direction: column;
+      }
+      label {
+        min-width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ===== HEADER ===== -->
+  <header>
+    <div class="logo">👩‍🏫 SAS - Attendance</div>
+    <div class="nav-links">
+      <a href="teacher_dashboard.html">Dashboard</a>
+      <a href="teacher_marks.html">Marks</a>
+      <a href="teacher_attendance.html">Attendance</a>
+      <a href="teacher_performance.html">Performance</a>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main>
+    <h2>Manage Student Attendance</h2>
+
+    <div id="message" class="message"></div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h4>Total Records</h4>
+        <p id="totalRecords">0</p>
+      </div>
+      <div class="stat-card">
+        <h4>Present</h4>
+        <p id="totalPresent" style="color: #2b8a3e;">0</p>
+      </div>
+      <div class="stat-card">
+        <h4>Absent</h4>
+        <p id="totalAbsent" style="color: #c92a2a;">0</p>
+      </div>
+      <div class="stat-card">
+        <h4>Attendance Rate</h4>
+        <p id="attendanceRate">0%</p>
+      </div>
+    </div>
+
+    <!-- Mark Attendance Form -->
+    <div class="attendance-form">
+      <h3>Mark Attendance</h3>
+      
+      <div class="form-group">
+        <label>Student:</label>
+        <select id="studentSelect">
+          <option value="">Loading students...</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Course:</label>
+        <select id="courseSelect">
+          <option value="">Loading courses...</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Date:</label>
+        <input type="date" id="dateInput" />
+      </div>
+
+      <div class="form-group">
+        <label>Status:</label>
+        <select id="statusSelect">
+          <option value="Present">Present</option>
+          <option value="Absent">Absent</option>
+        </select>
+      </div>
+
+      <button class="btn" id="saveAttendanceBtn">💾 Mark Attendance</button>
+    </div>
+
+    <!-- Attendance Records Table -->
+    <h3 style="color:#364fc7; margin-top:2rem; margin-bottom:1rem;">Attendance Records</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Student ID</th>
+          <th>Student Name</th>
+          <th>Course ID</th>
+          <th>Course Name</th>
+          <th>Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="attendanceTable">
+        <tr>
+          <td colspan="6" class="loading">Loading attendance records...</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Attendance Summary Chart -->
+    <div class="chart-container">
+      <h3 style="text-align:center; color:#364fc7; margin-bottom:1rem;">Attendance Summary</h3>
+      <canvas id="attendanceChart" height="100"></canvas>
+    </div>
+  </main>
+
+  <footer>
+    © 2025 Student Automated System | Teacher Attendance
+  </footer>
+
+  <script>
+    const API_BASE = "http://localhost:5000";
+    
+    // Get teacher data from sessionStorage
+    const teacherId = sessionStorage.getItem("teacherId");
+    const teacherName = sessionStorage.getItem("teacherName");
+    const teacherDept = sessionStorage.getItem("teacherDepartment");
+
+    console.log("📋 Attendance page loading for teacher:", { teacherId, teacherName, teacherDept });
+
+    if (!teacherId) {
+      alert("⚠️ No teacher logged in. Please login again.");
+      window.location.href = "../index.html";
+    }
+
+    const studentSelect = document.getElementById("studentSelect");
+    const courseSelect = document.getElementById("courseSelect");
+    const dateInput = document.getElementById("dateInput");
+    const statusSelect = document.getElementById("statusSelect");
+    const saveBtn = document.getElementById("saveAttendanceBtn");
+    const attendanceTable = document.getElementById("attendanceTable");
+    const messageDiv = document.getElementById("message");
+
+    // Set today's date as default
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.value = today;
+
+    // ===== Show Message =====
+    function showMessage(text, type = "success") {
+      messageDiv.textContent = text;
+      messageDiv.className = `message ${type}`;
+      messageDiv.style.display = "block";
+      
+      setTimeout(() => {
+        messageDiv.style.display = "none";
+      }, 4000);
+    }
+
+    // ===== Load Students =====
+    async function loadStudents() {
+      try {
+        console.log("📚 Loading students for teacher:", teacherId);
+        
+        const res = await fetch(`${API_BASE}/teacher/students/${teacherId}`);
+        if (!res.ok) throw new Error("Failed to load students");
+        
+        const data = await res.json();
+        console.log("✅ Students loaded:", data.length);
+
+        if (data.length === 0) {
+          studentSelect.innerHTML = `<option value="">No students in your department</option>`;
+          return;
+        }
+
+        studentSelect.innerHTML = 
+          `<option value="">-- Select Student --</option>` +
+          data.map(s => `<option value="${s.STUDENT_ID}">${s.STUDENT_ID} - ${s.NAME}</option>`).join("");
+      } catch (error) {
+        console.error("❌ Error loading students:", error);
+        studentSelect.innerHTML = `<option value="">Error loading students</option>`;
+        showMessage("Failed to load students", "error");
+      }
+    }
+
+    // ===== Load Courses =====
+    async function loadCourses() {
+      try {
+        console.log("📖 Loading courses for teacher:", teacherId);
+        
+        const res = await fetch(`${API_BASE}/teacher/courses/${teacherId}`);
+        if (!res.ok) throw new Error("Failed to load courses");
+        
+        const data = await res.json();
+        console.log("✅ Courses loaded:", data.length);
+
+        if (data.length === 0) {
+          courseSelect.innerHTML = `<option value="">No courses in your department</option>`;
+          return;
+        }
+
+        courseSelect.innerHTML = 
+          `<option value="">-- Select Course --</option>` +
+          data.map(c => `<option value="${c.COURSE_ID}">${c.COURSE_ID} - ${c.COURSE_NAME}</option>`).join("");
+      } catch (error) {
+        console.error("❌ Error loading courses:", error);
+        courseSelect.innerHTML = `<option value="">Error loading courses</option>`;
+        showMessage("Failed to load courses", "error");
+      }
+    }
+
+    // ===== Load Attendance Records =====
+    async function loadAttendanceRecords() {
+      try {
+        console.log("📊 Loading attendance records for teacher:", teacherId);
+        
+        const res = await fetch(`${API_BASE}/teacher/attendance/${teacherId}`);
+        
+        console.log("📡 Response status:", res.status);
+        
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error("❌ Server error:", errorText);
+          throw new Error(`Server returned ${res.status}: ${errorText}`);
+        }
+        
+        const rows = await res.json();
+        console.log("✅ Attendance records received:", rows);
+        console.log("✅ Number of records:", rows.length);
+
+        if (rows.length === 0) {
+          attendanceTable.innerHTML = `<tr><td colspan="6" style="padding: 2rem; color: #868e96;">No attendance records found yet. Start marking attendance above!</td></tr>`;
+          updateStats(0, 0, 0);
+          updateChart(0, 0);
+          return;
+        }
+
+        // Sort by date descending (newest first)
+        rows.sort((a, b) => new Date(b.DATE) - new Date(a.DATE));
+
+        attendanceTable.innerHTML = rows.map(r => {
+          const isPresent = r.STATUS === 'Present';
+          return `
+            <tr>
+              <td>${r.STUDENT_ID}</td>
+              <td>${r.STUDENT_NAME}</td>
+              <td>${r.COURSE_ID}</td>
+              <td>${r.COURSE_NAME}</td>
+              <td>${formatDate(r.DATE)}</td>
+              <td class="${isPresent ? 'status-present' : 'status-absent'}">
+                ${isPresent ? '✅ Present' : '❌ Absent'}
+              </td>
+            </tr>
+          `;
+        }).join("");
+
+        // Calculate statistics
+        const present = rows.filter(r => r.STATUS === 'Present').length;
+        const absent = rows.filter(r => r.STATUS === 'Absent').length;
+        const total = rows.length;
+        
+        updateStats(total, present, absent);
+        updateChart(present, absent);
+
+      } catch (error) {
+        console.error("❌ Error loading attendance:", error);
+        attendanceTable.innerHTML = `
+          <tr>
+            <td colspan="6" class="error" style="padding: 2rem;">
+              <p style="margin-bottom: 0.5rem;">⚠️ Error loading attendance records</p>
+              <p style="font-size: 0.9rem; color: #666;">${error.message}</p>
+              <p style="font-size: 0.85rem; margin-top: 0.5rem; color: #868e96;">
+                This could mean:
+                <br>• The attendance table doesn't exist yet
+                <br>• No attendance records have been created
+                <br>• Database connection issue
+                <br><br>Try marking attendance above to create the first record.
+              </p>
+            </td>
+          </tr>
+        `;
+        updateStats(0, 0, 0);
+        updateChart(0, 0);
+        // Don't show error message if it's just empty data
+        if (!error.message.includes("not found")) {
+          showMessage("Unable to load attendance records. You can still mark attendance.", "error");
+        }
+      }
+    }
+
+    // ===== Format Date =====
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+      });
+    }
+
+    // ===== Update Statistics =====
+    function updateStats(total, present, absent) {
+      document.getElementById("totalRecords").textContent = total;
+      document.getElementById("totalPresent").textContent = present;
+      document.getElementById("totalAbsent").textContent = absent;
+      
+      const rate = total > 0 ? ((present / total) * 100).toFixed(1) : 0;
+      document.getElementById("attendanceRate").textContent = rate + "%";
+    }
+
+    // ===== Save Attendance =====
+    saveBtn.addEventListener("click", async () => {
+      const student_id = studentSelect.value;
+      const course_id = courseSelect.value;
+      const date = dateInput.value;
+      const status = statusSelect.value;
+
+      // Validation
+      if (!student_id) {
+        showMessage("⚠️ Please select a student", "error");
+        return;
+      }
+
+      if (!course_id) {
+        showMessage("⚠️ Please select a course", "error");
+        return;
+      }
+
+      if (!date) {
+        showMessage("⚠️ Please select a date", "error");
+        return;
+      }
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = "💾 Saving...";
+
+      try {
+        console.log("💾 Saving attendance:", { student_id, course_id, date, status });
+        
+        const res = await fetch(`${API_BASE}/teacher/attendance`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ student_id, course_id, date, status })
+        });
+
+        if (!res.ok) {
+          const error = await res.json();
+          throw new Error(error.error || "Failed to save attendance");
+        }
+
+        const result = await res.json();
+        console.log("✅ Attendance saved successfully");
+        
+        showMessage("✅ " + result.message, "success");
+
+        // Clear form
+        studentSelect.value = "";
+        courseSelect.value = "";
+        dateInput.value = today;
+        statusSelect.value = "Present";
+
+        // Refresh table
+        await loadAttendanceRecords();
+
+      } catch (error) {
+        console.error("❌ Error saving attendance:", error);
+        showMessage("❌ " + error.message, "error");
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "💾 Mark Attendance";
+      }
+    });
+
+    // ===== Chart.js Attendance Summary =====
+    const ctx = document.getElementById("attendanceChart").getContext("2d");
+    let attendanceChart = new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        labels: ["Present", "Absent"],
+        datasets: [{
+          data: [0, 0],
+          backgroundColor: ["#51cf66", "#ff6b6b"],
+          borderWidth: 3,
+          borderColor: "#fff"
+        }],
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: "bottom",
+            labels: {
+              padding: 15,
+              font: {
+                size: 14
+              }
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const label = context.label || '';
+                const value = context.parsed || 0;
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                return `${label}: ${value} (${percentage}%)`;
+              }
+            }
+          }
+        },
+      },
+    });
+
+    function updateChart(present, absent) {
+      attendanceChart.data.datasets[0].data = [present, absent];
+      attendanceChart.update();
+    }
+
+    function logout() {
+      if (confirm("Are you sure you want to logout?")) {
+        sessionStorage.clear();
+        window.location.href = "../index.html";
+      }
+    }
+
+    // ===== Initialize =====
+    (async function init() {
+      console.log("🚀 Initializing teacher attendance page...");
+      await loadStudents();
+      await loadCourses();
+      await loadAttendanceRecords();
+      console.log("✅ Page initialization complete");
+    })();
+  </script>
+</body>
+</html>

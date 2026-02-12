@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard | SAS</title>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      background: #f4f6fb;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #4c6ef5;
+      color: #fff;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .nav-links a {
+      color: #fff;
+      text-decoration: none;
+      margin-left: 1.5rem;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: #ffe066;
+    }
+
+    main {
+      flex: 1;
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 2rem auto;
+    }
+
+    h2 {
+      text-align: center;
+      color: #364fc7;
+      margin-bottom: 2rem;
+    }
+
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      text-align: center;
+      transition: 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+    }
+
+    .card h3 {
+      font-size: 2rem;
+      color: #364fc7;
+      margin-bottom: 0.5rem;
+    }
+
+    .card p {
+      color: #495057;
+      font-weight: 500;
+    }
+
+    .chart-section {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .chart-box {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      padding: 1.5rem;
+    }
+
+    .chart-box h3 {
+      text-align: center;
+      color: #364fc7;
+      margin-bottom: 1rem;
+    }
+
+    .recent-activity {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      padding: 1.5rem;
+    }
+
+    .recent-activity h3 {
+      color: #364fc7;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    ul.activity-list {
+      list-style: none;
+    }
+
+    ul.activity-list li {
+      padding: 0.8rem 0;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    ul.activity-list li:last-child {
+      border-bottom: none;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      color: #777;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      main {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ===== HEADER ===== -->
+  <header>
+    <div class="logo">👩‍💼 SAS - Admin Dashboard</div>
+    <div class="nav-links">
+      <a href="admin_dashboard.html">Dashboard</a>
+      <a href="admin_manage_students.html">Students</a>
+      <a href="admin_manage_teachers.html">Teachers</a>
+      <a href="admin_notices.html">Notices</a>
+      <a href="index.html">Logout</a>
+    </div>
+  </header>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main>
+    <h2>System Overview</h2>
+
+    <!-- Summary Cards -->
+    <div class="stats-container">
+      <div class="card">
+        <h3 id="studentCount">120</h3>
+        <p>Total Students</p>
+      </div>
+      <div class="card">
+        <h3 id="teacherCount">15</h3>
+        <p>Total Teachers</p>
+      </div>
+      <div class="card">
+        <h3 id="attendanceAvg">89%</h3>
+        <p>Average Attendance</p>
+      </div>
+      <div class="card">
+        <h3 id="noticesCount">8</h3>
+        <p>Active Notices</p>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="chart-section">
+      <div class="chart-box">
+        <h3>Student Enrollment Trend</h3>
+        <canvas id="studentTrendChart" height="160"></canvas>
+      </div>
+
+      <div class="chart-box">
+        <h3>Department-wise Student Count</h3>
+        <canvas id="deptChart" height="160"></canvas>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="recent-activity">
+      <h3>Recent Activity</h3>
+      <ul class="activity-list" id="activityList">
+        <li>✅ Teacher <b>R. Sharma</b> updated marks for DBMS.</li>
+        <li>🧾 New notice posted: <b>Internal Exam Schedule</b>.</li>
+        <li>📈 Attendance report generated for October.</li>
+        <li>👩‍🎓 Student <b>A. Mehta</b> registered successfully.</li>
+      </ul>
+    </div>
+  </main>
+
+  <footer>
+    © 2025 Student Automated System | Admin Dashboard
+  </footer>
+
+  <script>
+    // ====== Student Trend Chart ======
+    const studentTrendCtx = document.getElementById("studentTrendChart").getContext("2d");
+    new Chart(studentTrendCtx, {
+      type: "line",
+      data: {
+        labels: ["Jan", "Mar", "May", "Jul", "Sep", "Nov"],
+        datasets: [{
+          label: "Total Students",
+          data: [80, 90, 100, 110, 120, 130],
+          borderColor: "#4c6ef5",
+          backgroundColor: "rgba(76, 110, 245, 0.1)",
+          tension: 0.3,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+
+    // ====== Department Chart ======
+    const deptCtx = document.getElementById("deptChart").getContext("2d");
+    new Chart(deptCtx, {
+      type: "bar",
+      data: {
+        labels: ["CSE", "IT", "ENTC", "Mechanical", "Civil"],
+        datasets: [{
+          label: "No. of Students",
+          data: [40, 30, 25, 20, 15],
+          backgroundColor: "#4c6ef5",
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

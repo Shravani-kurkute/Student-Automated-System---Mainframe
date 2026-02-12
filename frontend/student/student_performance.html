@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Performance | Student Automated System</title>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
+    body { background: #f4f6fb; color: #333; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: #4c6ef5; color: #fff; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .logo { font-size: 1.5rem; font-weight: 600; }
+    
+    .nav-links { display: flex; align-items: center; gap: 1rem; }
+    .nav-links a { color: #fff; text-decoration: none; font-weight: 500; transition: 0.3s; }
+    .nav-links a:hover { color: #ffe066; }
+    
+    .logout-btn { 
+      background: #fa5252; 
+      color: #fff; 
+      padding: 0.5rem 1rem; 
+      border-radius: 8px; 
+      border: none;
+      cursor: pointer;
+      font-weight: 600; 
+      transition: 0.3s; 
+    }
+    .logout-btn:hover { background: #e03131; }
+    
+    .dashboard { flex: 1; display: flex; padding: 2rem; gap: 2rem; }
+    .sidebar { width: 250px; background: #fff; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    .sidebar h3 { color: #364fc7; margin-bottom: 1rem; border-bottom: 2px solid #dee2e6; padding-bottom: 0.5rem; }
+    .sidebar ul { list-style: none; }
+    .sidebar li { padding: 0.6rem 0; cursor: pointer; transition: 0.3s; }
+    .sidebar a { text-decoration: none; color: inherit; display: block; }
+    .sidebar li:hover { color: #4c6ef5; font-weight: 600; }
+
+    .main-content { flex: 1; background: #fff; border-radius: 12px; padding: 2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    h2 { color: #364fc7; margin-bottom: 1rem; }
+
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: #4c6ef5;
+      font-size: 1.2rem;
+    }
+
+    .error {
+      background: #ffe0e0;
+      color: #c92a2a;
+      padding: 1.5rem;
+      border-radius: 8px;
+      text-align: center;
+      margin: 2rem 0;
+    }
+
+    .student-info {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+    }
+
+    .student-info p {
+      margin: 0.3rem 0;
+      font-weight: 500;
+    }
+
+    .charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem; margin-top: 2rem; }
+    .chart-card { background: #f8f9fa; border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0,0,0,0.05); }
+    .chart-card h3 { text-align: center; color: #364fc7; margin-bottom: 1rem; }
+
+    footer { text-align: center; padding: 1rem; color: #777; font-size: 0.9rem; }
+
+    .download-btn {
+      background: #4c6ef5;
+      color: white;
+      padding: 12px 22px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: 0.3s;
+      margin-bottom: 1rem;
+    }
+
+    .download-btn:hover {
+      background: #364fc7;
+    }
+
+    .download-btn:disabled {
+      background: #adb5bd;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 768px) {
+      .dashboard {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+      }
+      .charts {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <header>
+    <div class="logo">🎓 SAS - Student Performance</div>
+    <div class="nav-links">
+      <a href="student_dashboard.html">Dashboard</a>
+      <a href="student_marks.html">Marks</a>
+      <a href="student_performance.html">Performance</a>
+      <a href="student_attendance.html">Attendance</a>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <div class="dashboard">
+    <div class="sidebar">
+      <h3>Menu</h3>
+      <ul>
+        <li><a href="student_dashboard.html">🏠 Dashboard</a></li>
+        <li><a href="student_courses.html">📚 Courses</a></li>
+        <li><a href="student_marks.html">🧾 Marks</a></li>
+        <li><a href="student_performance.html">📊 Performance</a></li>
+        <li><a href="student_attendance.html">📅 Attendance</a></li>
+        <li><a href="student_timetable.html">🕐 Time Table</a></li>
+        <li><a href="student_notices.html">📢 Notices</a></li>
+        <li><a href="student_settings.html">⚙️ Settings</a></li>
+        <li><a href="student_profile.html">👤 Profile</a></li>
+      </ul>
+    </div>
+
+    <div class="main-content">
+      <div id="loadingMessage" class="loading">Loading performance data...</div>
+      <div id="errorMessage" class="error" style="display: none;"></div>
+      
+      <div id="performanceContent" style="display: none;">
+        <h2>Academic Performance Overview</h2>
+
+        <div class="student-info">
+          <p><strong>Student ID:</strong> <span id="displayStudentId">-</span></p>
+          <p><strong>Name:</strong> <span id="displayStudentName">-</span></p>
+          <p><strong>Department:</strong> <span id="displayDepartment">-</span></p>
+        </div>
+
+        <!-- Download Button -->
+        <button class="download-btn" id="downloadBtn" onclick="downloadPerformancePDF()">
+          ⬇️ Download Performance PDF
+        </button>
+
+        <div class="charts">
+          <div class="chart-card">
+            <h3>📈 Marks by Subject</h3>
+            <canvas id="subjectChart"></canvas>
+          </div>
+
+          <div class="chart-card">
+            <h3>📊 Average Marks Trend</h3>
+            <canvas id="avgChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card" style="margin-top:2rem;">
+          <h3>💯 Grade Distribution</h3>
+          <canvas id="gradeChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>© 2025 Student Automated System | Performance Analytics</footer>
+
+  <script>
+    const API_BASE = "http://localhost:5000";
+    
+    let chart1, chart2, chart3;
+    let marksData = [];
+    let studentInfo = {
+      id: null,
+      name: null,
+      department: null
+    };
+
+    // Get student data from sessionStorage
+    const studentId = sessionStorage.getItem("studentId");
+    const studentName = sessionStorage.getItem("studentName");
+    const studentDept = sessionStorage.getItem("studentDepartment");
+
+    console.log("📊 Performance page loading for student:", { studentId, studentName, studentDept });
+
+    if (!studentId) {
+      document.getElementById("loadingMessage").style.display = "none";
+      document.getElementById("errorMessage").textContent = "⚠️ No student logged in. Redirecting to login...";
+      document.getElementById("errorMessage").style.display = "block";
+      
+      setTimeout(() => {
+        window.location.href = "../index.html";
+      }, 2000);
+    } else {
+      loadPerformance();
+    }
+
+    async function loadPerformance() {
+      try {
+        console.log("🔍 Fetching student data...");
+        
+        // Fetch student details
+        const studentRes = await fetch(`${API_BASE}/students/${studentId}`);
+        if (!studentRes.ok) throw new Error("Failed to fetch student data");
+        
+        const sData = await studentRes.json();
+        console.log("✅ Student data:", sData);
+        
+        studentInfo.id = sData.STUDENT_ID;
+        studentInfo.name = sData.NAME;
+        studentInfo.department = sData.DEPARTMENT;
+
+        // Display student info
+        document.getElementById("displayStudentId").textContent = studentInfo.id;
+        document.getElementById("displayStudentName").textContent = studentInfo.name;
+        document.getElementById("displayDepartment").textContent = studentInfo.department;
+
+        // Fetch marks data
+        console.log("📚 Fetching marks data...");
+        const res = await fetch(`${API_BASE}/marks/${studentId}`);
+        if (!res.ok) throw new Error("Failed to fetch marks data");
+        
+        const data = await res.json();
+        console.log("✅ Marks data:", data);
+
+        if (data.length === 0) {
+          throw new Error("No marks data available. Please contact your teacher.");
+        }
+
+        marksData = data;
+
+        const subjects = data.map(d => d.COURSE_NAME);
+        const marks = data.map(d => Number(d.MARKS));
+
+        const grades = marks.map(m => 
+          m >= 90 ? "A+" : 
+          m >= 80 ? "A" : 
+          m >= 70 ? "B" : 
+          m >= 60 ? "C" : 
+          m >= 40 ? "D" : "F"
+        );
+
+        // Chart 1: Marks by Subject
+        const ctx1 = document.getElementById("subjectChart");
+        if (chart1) chart1.destroy();
+        
+        chart1 = new Chart(ctx1, {
+          type: "bar",
+          data: {
+            labels: subjects,
+            datasets: [{
+              label: "Marks (%)",
+              data: marks,
+              backgroundColor: marks.map(m => m >= 40 ? "#4c6ef5" : "#fa5252"),
+              borderRadius: 8
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    return `Marks: ${context.parsed.y}/100`;
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 100,
+                ticks: { stepSize: 20 }
+              }
+            }
+          }
+        });
+
+        // Chart 2: Average Marks Trend
+        const avgMarks = marks.reduce((a, b) => a + b, 0) / marks.length;
+        const ctx2 = document.getElementById("avgChart");
+        if (chart2) chart2.destroy();
+        
+        chart2 = new Chart(ctx2, {
+          type: "line",
+          data: {
+            labels: ["Previous", "Current", "Projection"],
+            datasets: [{
+              label: "Average Marks",
+              data: [
+                Math.max(0, avgMarks - 5), 
+                avgMarks, 
+                Math.min(100, avgMarks + 3)
+              ],
+              borderColor: "#15aabf",
+              backgroundColor: "rgba(21,170,191,0.2)",
+              fill: true,
+              tension: 0.4,
+              borderWidth: 3,
+              pointRadius: 5,
+              pointBackgroundColor: "#15aabf"
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: true }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 100,
+                ticks: { stepSize: 20 }
+              }
+            }
+          }
+        });
+
+        // Chart 3: Grade Distribution
+        const gradeCounts = {};
+        grades.forEach(g => gradeCounts[g] = (gradeCounts[g] || 0) + 1);
+
+        const ctx3 = document.getElementById("gradeChart");
+        if (chart3) chart3.destroy();
+        
+        chart3 = new Chart(ctx3, {
+          type: "doughnut",
+          data: {
+            labels: Object.keys(gradeCounts),
+            datasets: [{
+              data: Object.values(gradeCounts),
+              backgroundColor: [
+                "#4c6ef5",  // A+
+                "#15aabf",  // A
+                "#51cf66",  // B
+                "#fab005",  // C
+                "#ff8787",  // D
+                "#fa5252"   // F
+              ],
+              borderWidth: 2,
+              borderColor: "#fff"
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                display: true,
+                position: "bottom"
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const label = context.label || '';
+                    const value = context.parsed || 0;
+                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                    const percentage = ((value / total) * 100).toFixed(1);
+                    return `${label}: ${value} (${percentage}%)`;
+                  }
+                }
+              }
+            }
+          }
+        });
+
+        // Hide loading, show content
+        document.getElementById("loadingMessage").style.display = "none";
+        document.getElementById("performanceContent").style.display = "block";
+
+        console.log("✅ Performance page loaded successfully");
+
+      } catch (err) {
+        console.error("❌ Error loading performance:", err);
+        
+        document.getElementById("loadingMessage").style.display = "none";
+        document.getElementById("errorMessage").textContent = `❌ ${err.message}`;
+        document.getElementById("errorMessage").style.display = "block";
+      }
+    }
+
+    // ============================
+    // DOWNLOAD PERFORMANCE PDF
+    // ============================
+    async function downloadPerformancePDF() {
+      const btn = document.getElementById("downloadBtn");
+      btn.disabled = true;
+      btn.textContent = "📥 Generating PDF...";
+
+      try {
+        const payload = {
+          studentId: studentInfo.id,
+          studentName: studentInfo.name,
+          dept: studentInfo.department,
+          chart1: document.getElementById("subjectChart").toDataURL("image/png"),
+          chart2: document.getElementById("avgChart").toDataURL("image/png"),
+          chart3: document.getElementById("gradeChart").toDataURL("image/png")
+        };
+
+        console.log("📄 Generating PDF with payload:", {
+          studentId: payload.studentId,
+          studentName: payload.studentName,
+          dept: payload.dept
+        });
+
+        const res = await fetch(`${API_BASE}/download/performance`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to generate PDF");
+        }
+
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `Performance_Report_${studentInfo.id}_${new Date().toISOString().split('T')[0]}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+
+        console.log("✅ PDF downloaded successfully");
+
+      } catch (error) {
+        console.error("❌ Error generating PDF:", error);
+        alert("❌ Failed to generate PDF: " + error.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "⬇️ Download Performance PDF";
+      }
+    }
+
+    function logout() {
+      if (confirm("Are you sure you want to logout?")) {
+        sessionStorage.clear();
+        localStorage.clear();
+        window.location.href = "../index.html";
+      }
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Dashboard | SAS</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
+    body { background: #f4f6fb; color: #333; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: #4c6ef5; color: #fff; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .logo { font-size: 1.5rem; font-weight: 600; }
+    .logout-btn { 
+      background: #fa5252; 
+      color: #fff; 
+      padding: 0.5rem 1rem; 
+      border-radius: 8px; 
+      text-decoration: none; 
+      font-weight: 600; 
+      transition: 0.3s; 
+      cursor: pointer;
+      border: none;
+    }
+    .logout-btn:hover { background: #e03131; }
+
+    .dashboard { flex: 1; display: flex; padding: 2rem; gap: 2rem; }
+    .sidebar { width: 250px; background: #fff; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    .sidebar h3 { color: #364fc7; margin-bottom: 1rem; border-bottom: 2px solid #dee2e6; padding-bottom: 0.5rem; }
+    .sidebar ul { list-style: none; }
+    .sidebar a { text-decoration: none; color: inherit; display: block; }
+    .sidebar li { padding: 0.6rem 0; cursor: pointer; transition: 0.3s; }
+    .sidebar li:hover { color: #4c6ef5; font-weight: 600; }
+
+    .main-content { flex: 1; background: #fff; border-radius: 12px; padding: 2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    .welcome { margin-bottom: 2rem; }
+    .welcome h2 { color: #364fc7; margin-bottom: 0.5rem; }
+
+    .stats { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+      gap: 1.5rem; 
+      margin-bottom: 2rem; 
+    }
+
+    .card { 
+      background: #f8f9fa; 
+      border-radius: 10px; 
+      padding: 1.5rem; 
+      text-align: center; 
+      box-shadow: 0 3px 10px rgba(0,0,0,0.05); 
+      transition: 0.3s; 
+    }
+    .card:hover { transform: translateY(-4px); }
+    .card h3 { color: #4c6ef5; margin-bottom: 0.5rem; font-size: 0.95rem; }
+    .card p { font-size: 1.1rem; }
+
+    .notifications { background: #f8f9fa; border-radius: 10px; padding: 1rem 1.5rem; }
+    .notifications h3 { color: #364fc7; margin-bottom: 0.8rem; }
+    .notifications ul { list-style: disc inside; }
+    .notifications li { padding: 0.3rem 0; }
+
+    footer { text-align: center; padding: 1rem; color: #777; font-size: 0.9rem; }
+
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: #4c6ef5;
+    }
+
+    .error {
+      background: #ffe0e0;
+      color: #c92a2a;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .dashboard {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">🎓 SAS - Student Dashboard</div>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </header>
+
+  <div class="dashboard">
+    <div class="sidebar">
+      <h3>Menu</h3>
+      <ul>
+        <li><a href="student_dashboard.html">🏠 Dashboard</a></li>
+        <li><a href="student_courses.html">📚 Courses</a></li>
+        <li><a href="student_marks.html">🧾 Marks</a></li>
+        <li><a href="student_performance.html">📊 Performance</a></li>
+        <li><a href="student_attendance.html">📅 Attendance</a></li>
+        <li><a href="student_timetable.html">🕐 Time Table</a></li>
+        <li><a href="student_notices.html">📢 Notices</a></li>
+        <li><a href="student_settings.html">⚙️ Settings</a></li>
+        <li><a href="student_profile.html">👤 Profile</a></li>
+      </ul>
+    </div>
+
+    <div class="main-content">
+      <div id="loadingMessage" class="loading">Loading dashboard...</div>
+      <div id="errorMessage" class="error" style="display: none;"></div>
+      
+      <div id="dashboardContent" style="display: none;">
+        <div class="welcome">
+          <h2 id="student-name">Welcome 👋</h2>
+          <p id="student-id" style="color:gray;"></p>
+          <p id="student-dept"></p>
+        </div>
+
+        <div class="stats">
+          <div class="card">
+            <h3>Student ID</h3>
+            <p><strong id="studentid-card">--</strong></p>
+          </div>
+          <div class="card">
+            <h3>Name</h3>
+            <p><strong id="studentname-card">--</strong></p>
+          </div>
+          <div class="card">
+            <h3>Email</h3>
+            <p><strong id="studentemail-card" style="font-size: 0.9rem;">--</strong></p>
+          </div>
+          <div class="card">
+            <h3>Department</h3>
+            <p><strong id="studentdept-card">--</strong></p>
+          </div>
+          <div class="card">
+            <h3>Semester</h3>
+            <p><strong id="studentsem-card">--</strong></p>
+          </div>
+          <div class="card">
+            <h3>Attendance</h3>
+            <p><strong id="studentattendance-card">--%</strong></p>
+          </div>
+          <div class="card">
+            <h3>Grade</h3>
+            <p><strong id="studentgrade-card">--</strong></p>
+          </div>
+        </div>
+
+        <div class="notifications">
+          <h3>Recent Updates</h3>
+          <ul id="notifications">
+            <li>Fetching updates...</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>© 2025 Student Automated System | Student Dashboard</footer>
+
+  <script>
+  const API_BASE = "http://localhost:5000";
+
+  // Get student data from sessionStorage
+  const studentId = sessionStorage.getItem("studentId");
+  const studentName = sessionStorage.getItem("studentName");
+  const studentEmail = sessionStorage.getItem("studentEmail");
+  const studentDept = sessionStorage.getItem("studentDepartment");
+
+  console.log("📊 Dashboard loading for student:", { studentId, studentName, studentEmail, studentDept });
+
+  if (!studentId) {
+    document.getElementById("loadingMessage").style.display = "none";
+    document.getElementById("errorMessage").textContent = "⚠️ No student logged in. Redirecting to login...";
+    document.getElementById("errorMessage").style.display = "block";
+    
+    setTimeout(() => {
+      window.location.href = "../index.html";
+    }, 2000);
+  } else {
+    loadStudentData();
+  }
+
+  async function loadStudentData() {
+    try {
+      console.log("🔍 Fetching student data from server:", `${API_BASE}/students/${studentId}`);
+      
+      const res = await fetch(`${API_BASE}/students/${studentId}`);
+      
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      
+      const student = await res.json();
+      console.log("✅ Student data received:", student);
+
+      // Update sessionStorage with fresh data from server
+      sessionStorage.setItem("studentName", student.NAME);
+      sessionStorage.setItem("studentEmail", student.EMAIL);
+      sessionStorage.setItem("studentDepartment", student.DEPARTMENT);
+      sessionStorage.setItem("studentSemester", student.SEMESTER || "N/A");
+      sessionStorage.setItem("studentGrade", student.GRADE || "N/A");
+
+      // Top welcome info
+      document.getElementById("student-name").textContent = `Welcome, ${student.NAME} 👋`;
+      document.getElementById("student-id").textContent = `Student ID: ${student.STUDENT_ID}`;
+      document.getElementById("student-dept").textContent = `Department: ${student.DEPARTMENT}`;
+
+      // Cards info
+      document.getElementById("studentid-card").textContent = student.STUDENT_ID;
+      document.getElementById("studentname-card").textContent = student.NAME;
+      document.getElementById("studentemail-card").textContent = student.EMAIL;
+      document.getElementById("studentdept-card").textContent = student.DEPARTMENT;
+      document.getElementById("studentsem-card").textContent = student.SEMESTER || "N/A";
+      document.getElementById("studentattendance-card").textContent = student.ATTENDANCE_PERCENT ? `${student.ATTENDANCE_PERCENT}%` : "N/A";
+      document.getElementById("studentgrade-card").textContent = student.GRADE || "N/A";
+
+      // Notifications
+      const notifications = [
+        `Welcome back, ${student.NAME}!`,
+        `Your current semester: ${student.SEMESTER || "N/A"}`,
+      ];
+
+      if (student.ATTENDANCE_PERCENT) {
+        notifications.push(`Attendance: ${student.ATTENDANCE_PERCENT}%`);
+        
+        if (student.ATTENDANCE_PERCENT < 75) {
+          notifications.push(`⚠️ Warning: Attendance is below 75%`);
+        }
+      }
+
+      if (student.GRADE) {
+        notifications.push(`Current Grade: ${student.GRADE}`);
+      }
+
+      document.getElementById("notifications").innerHTML = notifications.map(n => `<li>${n}</li>`).join("");
+
+      // Hide loading, show content
+      document.getElementById("loadingMessage").style.display = "none";
+      document.getElementById("dashboardContent").style.display = "block";
+
+      console.log("✅ Dashboard loaded successfully");
+
+    } catch (err) {
+      console.error("❌ Error loading student data:", err);
+      
+      document.getElementById("loadingMessage").style.display = "none";
+      document.getElementById("errorMessage").textContent = `❌ Error loading student data: ${err.message}`;
+      document.getElementById("errorMessage").style.display = "block";
+      
+      // Try to display cached session data if available
+      if (studentName) {
+        document.getElementById("dashboardContent").style.display = "block";
+        document.getElementById("student-name").textContent = `Welcome, ${studentName} 👋`;
+        document.getElementById("student-id").textContent = `Student ID: ${studentId}`;
+        document.getElementById("student-dept").textContent = `Department: ${studentDept || "Unknown"}`;
+        
+        document.getElementById("studentid-card").textContent = studentId;
+        document.getElementById("studentname-card").textContent = studentName;
+        document.getElementById("studentemail-card").textContent = studentEmail || "--";
+        document.getElementById("studentdept-card").textContent = studentDept || "--";
+        
+        document.getElementById("notifications").innerHTML = `
+          <li style="color: #c92a2a;">⚠️ Using cached data. Server connection failed.</li>
+          <li>Please check if backend is running on port 5000</li>
+        `;
+      }
+    }
+  }
+
+  function logout() {
+    if (confirm("Are you sure you want to logout?")) {
+      sessionStorage.clear();
+      localStorage.clear();
+      window.location.href = "../index.html";
+    }
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teacher Dashboard | SAS</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      background: #f4f6fb;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #4c6ef5;
+      color: #fff;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .nav-links a {
+      color: #fff;
+      text-decoration: none;
+      margin-left: 1.5rem;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: #ffe066;
+    }
+
+    main {
+      flex: 1;
+      padding: 2rem;
+      max-width: 1100px;
+      margin: 2rem auto;
+      width: 100%;
+    }
+
+    h2 {
+      color: #364fc7;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .dashboard-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+      transition: transform 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+    }
+
+    .card h3 {
+      color: #4c6ef5;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .card p {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #212529;
+    }
+
+    .recent-section {
+      margin-top: 2.5rem;
+    }
+
+    .recent-section h3 {
+      color: #4c6ef5;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid #dee2e6;
+      padding-bottom: 0.4rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    }
+
+    th, td {
+      padding: 0.9rem;
+      text-align: left;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    th {
+      background: #f1f3f5;
+      color: #495057;
+      font-weight: 600;
+    }
+
+    tr:hover {
+      background: #f8f9fa;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      color: #777;
+      font-size: 0.9rem;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: #4c6ef5;
+      font-size: 1.1rem;
+    }
+
+    .error {
+      background: #ffe0e0;
+      color: #c92a2a;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .logout-btn {
+      background: #fa5252;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .logout-btn:hover {
+      background: #e03131;
+    }
+
+    @media (max-width: 768px) {
+      main {
+        padding: 1rem;
+      }
+      .dashboard-cards {
+        grid-template-columns: 1fr;
+      }
+      header {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .nav-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ===== HEADER ===== -->
+  <header>
+    <div class="logo">👩‍🏫 SAS - Teacher Dashboard</div>
+    <div class="nav-links">
+      <a href="teacher_dashboard.html">Dashboard</a>
+      <a href="teacher_marks.html">Marks</a>
+      <a href="teacher_attendance.html">Attendance</a>
+      <a href="teacher_performance.html">Performance</a>
+      <a href="#" class="logout-btn" onclick="logout()">Logout</a>
+    </div>
+  </header>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main>
+    <div id="errorMessage" class="error" style="display: none;"></div>
+    <div id="loadingMessage" class="loading">Loading dashboard...</div>
+    
+    <div id="dashboardContent" style="display: none;">
+      <h2>Welcome, <span id="teacherName">...</span></h2>
+
+      <!-- Dashboard Overview Cards -->
+      <div class="dashboard-cards">
+        <div class="card">
+          <h3>Total Students</h3>
+          <p id="totalStudents">0</p>
+        </div>
+        <div class="card">
+          <h3>Total Courses</h3>
+          <p id="totalCourses">0</p>
+        </div>
+        <div class="card">
+          <h3>Department</h3>
+          <p id="department">-</p>
+        </div>
+        <div class="card">
+          <h3>Email</h3>
+          <p id="teacherEmail" style="font-size: 0.85rem;">-</p>
+        </div>
+      </div>
+
+      <!-- Recent Activity Table -->
+      <div class="recent-section">
+        <h3>Your Courses</h3>
+        <table id="coursesTable">
+          <thead>
+            <tr>
+              <th>Course ID</th>
+              <th>Course Name</th>
+              <th>Credits</th>
+            </tr>
+          </thead>
+          <tbody id="coursesTableBody">
+            <tr>
+              <td colspan="3" style="text-align: center;">Loading courses...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Students in Department -->
+      <div class="recent-section">
+        <h3>Students in Your Department</h3>
+        <table id="studentsTable">
+          <thead>
+            <tr>
+              <th>Student ID</th>
+              <th>Student Name</th>
+            </tr>
+          </thead>
+          <tbody id="studentsTableBody">
+            <tr>
+              <td colspan="2" style="text-align: center;">Loading students...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    © 2025 Student Automated System | Teacher Dashboard
+  </footer>
+
+  <script>
+    const API_BASE = "http://localhost:5000";
+
+    // Get teacher ID from sessionStorage (set during login)
+    const teacherId = sessionStorage.getItem("teacherId");
+    const teacherName = sessionStorage.getItem("teacherName");
+    const teacherDept = sessionStorage.getItem("teacherDepartment");
+    const teacherEmail = sessionStorage.getItem("teacherEmail");
+
+    console.log("🔍 Checking session data:", {
+      teacherId,
+      teacherName,
+      teacherDept,
+      teacherEmail
+    });
+
+    if (!teacherId) {
+      showError("No teacher logged in. Redirecting to login...");
+      setTimeout(() => {
+        window.location.href = "../index.html";
+      }, 2000);
+    } else {
+      loadTeacherDashboard();
+    }
+
+    async function loadTeacherDashboard() {
+      try {
+        console.log("📊 Loading dashboard for teacher:", teacherId);
+
+        // Fetch teacher details from server to verify
+        const teacherRes = await fetch(`${API_BASE}/teacher/${teacherId}`);
+        if (!teacherRes.ok) {
+          throw new Error("Teacher not found in database");
+        }
+        const teacher = await teacherRes.json();
+
+        console.log("✅ Teacher data from server:", teacher);
+
+        // Fetch students in teacher's department
+        const studentsRes = await fetch(`${API_BASE}/teacher/students/${teacherId}`);
+        if (!studentsRes.ok) {
+          throw new Error("Failed to fetch students");
+        }
+        const students = await studentsRes.json();
+
+        console.log("✅ Students loaded:", students.length);
+
+        // Fetch courses in teacher's department
+        const coursesRes = await fetch(`${API_BASE}/teacher/courses/${teacherId}`);
+        if (!coursesRes.ok) {
+          throw new Error("Failed to fetch courses");
+        }
+        const courses = await coursesRes.json();
+
+        console.log("✅ Courses loaded:", courses.length);
+
+        // Update UI with teacher info
+        document.getElementById("teacherName").textContent = teacher.NAME || teacherName || "Teacher";
+        document.getElementById("totalStudents").textContent = students.length;
+        document.getElementById("totalCourses").textContent = courses.length;
+        document.getElementById("department").textContent = teacher.DEPARTMENT || teacherDept || "-";
+        document.getElementById("teacherEmail").textContent = teacher.EMAIL || teacherEmail || "-";
+
+        // Populate courses table
+        const coursesBody = document.getElementById("coursesTableBody");
+        coursesBody.innerHTML = "";
+
+        if (courses.length === 0) {
+          coursesBody.innerHTML = '<tr><td colspan="3" style="text-align: center;">No courses assigned</td></tr>';
+        } else {
+          courses.forEach(course => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${course.COURSE_ID}</td>
+              <td>${course.COURSE_NAME}</td>
+              <td>${course.CREDITS}</td>
+            `;
+            coursesBody.appendChild(row);
+          });
+        }
+
+        // Populate students table
+        const studentsBody = document.getElementById("studentsTableBody");
+        studentsBody.innerHTML = "";
+
+        if (students.length === 0) {
+          studentsBody.innerHTML = '<tr><td colspan="2" style="text-align: center;">No students in this department</td></tr>';
+        } else {
+          students.forEach(student => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${student.STUDENT_ID}</td>
+              <td>${student.NAME}</td>
+            `;
+            studentsBody.appendChild(row);
+          });
+        }
+
+        // Hide loading, show content
+        document.getElementById("loadingMessage").style.display = "none";
+        document.getElementById("dashboardContent").style.display = "block";
+
+        console.log("✅ Dashboard loaded successfully");
+
+      } catch (error) {
+        console.error("❌ Error loading dashboard:", error);
+        showError("Failed to load dashboard: " + error.message);
+        document.getElementById("loadingMessage").style.display = "none";
+      }
+    }
+
+    function showError(message) {
+      const errorDiv = document.getElementById("errorMessage");
+      errorDiv.textContent = message;
+      errorDiv.style.display = "block";
+    }
+
+    function logout() {
+      if (confirm("Are you sure you want to logout?")) {
+        sessionStorage.clear();
+        window.location.href = "../index.html";
+      }
+    }
+  </script>
+</body>
+</html>

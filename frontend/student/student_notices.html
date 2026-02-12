@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Notices | SAS</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
+    body { background: #f4f6fb; color: #333; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: #4c6ef5; color: #fff; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .logo { font-size: 1.5rem; font-weight: 600; }
+    .logout-btn { background: #fff; color: #4c6ef5; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; font-weight: 600; transition: 0.3s; }
+    .logout-btn:hover { background: #364fc7; color: #fff; }
+    .dashboard { flex: 1; display: flex; padding: 2rem; gap: 2rem; }
+    .sidebar { width: 250px; background: #fff; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    .sidebar h3 { color: #364fc7; margin-bottom: 1rem; border-bottom: 2px solid #dee2e6; padding-bottom: 0.5rem; }
+    .sidebar ul { list-style: none; }
+    .sidebar li { padding: 0.6rem 0; cursor: pointer; transition: 0.3s; }
+    .sidebar a { text-decoration: none; color: inherit; display: block; }
+    .sidebar li:hover { color: #4c6ef5; font-weight: 600; }
+    .main-content { flex: 1; background: #fff; border-radius: 12px; padding: 2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    h2 { color: #364fc7; margin-bottom: 1.5rem; }
+    .notice-list { display: flex; flex-direction: column; gap: 1rem; }
+    .notice-card { background: #f8f9fa; border-left: 6px solid #4c6ef5; border-radius: 10px; padding: 1rem 1.5rem; box-shadow: 0 3px 8px rgba(0,0,0,0.05); transition: 0.3s; }
+    .notice-card:hover { transform: translateY(-4px); background: #edf2ff; }
+    .notice-title { font-weight: 600; color: #364fc7; margin-bottom: 0.4rem; }
+    .notice-date { font-size: 0.9rem; color: #777; margin-bottom: 0.5rem; }
+    .notice-desc { font-size: 0.95rem; color: #444; }
+    footer { text-align: center; padding: 1rem; color: #777; font-size: 0.9rem; }
+    .chart-card { margin-top: 2rem; background: #f8f9fa; padding: 1.5rem; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.05); }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header>
+    <div class="logo">🎓 SAS - Student Notices</div>
+    <a href="../login.html" class="logout-btn" onclick="logout()">Logout</a>
+  </header>
+
+  <div class="dashboard">
+    <div class="sidebar">
+      <h3>Menu</h3>
+      <ul>
+        <li><a href="/student/dashboard">🏠 Dashboard</a></li>
+        <li><a href="/student/courses">📚 Courses</a></li>
+        <li><a href="/student/marks">🧾 Marks</a></li>
+        <li><a href="/student/performance">📊 Performance</a></li>
+        <li><a href="/student/attendance">📅 Attendance</a></li>
+        <li><a href="/student/notices">📢 Notices</a></li>
+        <li><a href="/student/settings">⚙️ Settings</a></li>
+        <li><a href="/student/profile">👤 Profile</a></li>
+      </ul>
+    </div>
+
+    <div class="main-content">
+      <h2>Latest Announcements</h2>
+
+      <div class="notice-list" id="noticeList">
+        <!-- Notices will load here dynamically -->
+      </div>
+
+      <div class="chart-card">
+        <h3 style="text-align:center; color:#364fc7;">📊 Notice Category Distribution</h3>
+        <canvas id="noticeChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <footer>© 2025 Student Automated System | Notices Board</footer>
+
+  <script>
+    // 📰 Sample static notices (replace with DB2 data later)
+    const notices = [
+      {
+        title: "Mid-Term Exam Schedule Released",
+        date: "Oct 25, 2025",
+        category: "Academic",
+        description: "The mid-term examination for all departments will commence from Nov 10. Check your department portal for timetable details."
+      },
+      {
+        title: "Workshop on AI & Data Science",
+        date: "Oct 20, 2025",
+        category: "Event",
+        description: "A hands-on workshop on Artificial Intelligence and Data Science will be held in the seminar hall on Oct 28. Registrations open now."
+      },
+      {
+        title: "Semester Fee Payment Reminder",
+        date: "Oct 15, 2025",
+        category: "Administration",
+        description: "All students are requested to complete their semester fee payment by Oct 31 to avoid late fees."
+      },
+      {
+        title: "Campus Placement Drive - Infosys",
+        date: "Oct 10, 2025",
+        category: "Placement",
+        description: "Infosys is visiting the campus on Nov 2 for placement drive. Eligible students can apply through the T&P portal."
+      }
+    ];
+
+    // 🧠 Dynamically populate notices
+    const noticeContainer = document.getElementById("noticeList");
+    notices.forEach(n => {
+      const card = document.createElement("div");
+      card.classList.add("notice-card");
+      card.innerHTML = `
+        <div class="notice-title">${n.title}</div>
+        <div class="notice-date">${n.date} • <strong>${n.category}</strong></div>
+        <div class="notice-desc">${n.description}</div>
+      `;
+      noticeContainer.appendChild(card);
+    });
+
+    // 📊 Chart: Notice Categories
+    const categories = {};
+    notices.forEach(n => categories[n.category] = (categories[n.category] || 0) + 1);
+    new Chart(document.getElementById("noticeChart"), {
+      type: "doughnut",
+      data: {
+        labels: Object.keys(categories),
+        datasets: [{
+          data: Object.values(categories),
+          backgroundColor: ["#4c6ef5", "#15aabf", "#fab005", "#51cf66", "#fa5252"]
+        }]
+      },
+      options: {
+        plugins: {
+          legend: { position: "right" }
+        }
+      }
+    });
+
+    // Logout function
+    function logout() {
+      localStorage.removeItem("STUDENT_ID");
+      window.location.href = "../login.html";
+    }
+  </script>
+</body>
+</html>

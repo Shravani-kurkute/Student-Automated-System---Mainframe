@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Courses | Student Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
+    body { background: #f4f6fb; color: #333; min-height: 100vh; display: flex; flex-direction: column; }
+
+    header {
+      background: #4c6ef5;
+      color: #fff;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .logo { font-size: 1.5rem; font-weight: 600; }
+    .logout-btn { background: #fff; color: #4c6ef5; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; font-weight: 600; transition: 0.3s; }
+    .logout-btn:hover { background: #364fc7; color: #fff; }
+
+    .dashboard { flex: 1; display: flex; padding: 2rem; gap: 2rem; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 250px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .sidebar h3 { color: #364fc7; margin-bottom: 1rem; border-bottom: 2px solid #dee2e6; padding-bottom: 0.5rem; }
+    .sidebar ul { list-style: none; }
+    .sidebar a {
+      color: inherit;
+      text-decoration: none;
+      display: block;
+      padding: 0.6rem 0;
+      transition: 0.3s;
+    }
+    .sidebar a:hover { color: #4c6ef5; font-weight: 600; }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      background: #fff;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .main-content h2 { color: #364fc7; margin-bottom: 1rem; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #dee2e6; }
+
+    th {
+      background: #4c6ef5;
+      color: #fff;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      letter-spacing: 0.5px;
+    }
+
+    tr:hover { background: #eef2ff; }
+
+    .no-data { text-align: center; padding: 1.5rem; color: #666; }
+
+    footer { text-align: center; padding: 1rem; color: #777; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🎓 SAS - Student Dashboard</div>
+  <a href="../login.html" class="logout-btn" onclick="logout()">Logout</a>
+</header>
+
+<div class="dashboard">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h3>Menu</h3>
+    <ul>
+      <li><a href="/student/dashboard">🏠 Dashboard</a></li>
+      <li><a href="/student/courses">📚 Courses</a></li>
+      <li><a href="/student/marks">🧾 Marks</a></li>
+      <li><a href="/student/performance">📊 Performance</a></li>
+      <li><a href="/student/attendance">📅 Attendance</a></li>
+      <li><a href="/student/notices">📢 Notices</a></li>
+      <li><a href="/student/settings">⚙️ Settings</a></li>
+      <li><a href="/student/profile">👤 Profile</a></li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <h2>📚 Your Courses</h2>
+    <p id="course-info">Loading your department courses...</p>
+
+    <table id="coursesTable">
+      <thead>
+        <tr>
+          <th>Course ID</th>
+          <th>Course Name</th>
+          <th>Department</th>
+          <th>Credits</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="4" class="no-data">Loading your courses...</td></tr>
+      </tbody>
+    </table>
+
+    <button onclick="downloadCoursesPDF()" style="margin-bottom: 15px; padding: 10px 20px; background:#4c6ef5; color:white; border:none; border-radius:8px; cursor:pointer;">
+      ⬇️ Download Courses PDF
+    </button>
+  </div>
+</div>
+
+<footer>© 2025 Student Automated System | Courses Page</footer>
+
+<script>
+// Load student info
+document.addEventListener("DOMContentLoaded", () => {
+  const dept = localStorage.getItem("STUDENT_DEPT");
+  if (dept && document.querySelector(".student-dept")) {
+    document.querySelector(".student-dept").textContent = dept;
+  }
+});
+
+// Load courses
+async function loadCourses() {
+  const tableBody = document.querySelector("#coursesTable tbody");
+  const infoText = document.getElementById("course-info");
+  const studentId = localStorage.getItem("STUDENT_ID") || "S101";
+
+  try {
+    const studentRes = await fetch(`http://localhost:5000/students/${studentId}`);
+    const student = await studentRes.json();
+    const department = student.DEPARTMENT;
+
+    infoText.textContent = `Showing courses for department: ${department}`;
+
+    const res = await fetch(`http://localhost:5000/courses/${department}`);
+    const data = await res.json();
+
+    tableBody.innerHTML = data.map(course => `
+      <tr>
+        <td>${course.COURSE_ID}</td>
+        <td>${course.COURSE_NAME}</td>
+        <td>${course.DEPARTMENT}</td>
+        <td>${course.CREDITS}</td>
+      </tr>
+    `).join("");
+
+  } catch (err) {
+    console.error(err);
+    tableBody.innerHTML = '<tr><td colspan="4" class="no-data">Error loading courses.</td></tr>';
+    infoText.textContent = "⚠️ Unable to load courses.";
+  }
+}
+
+loadCourses();
+
+// Logout
+function logout() {
+  localStorage.removeItem("STUDENT_ID");
+  window.location.href = "../login.html";
+}
+
+// Download PDF  ✅ UPDATED
+async function downloadCoursesPDF() {
+  const studentId = localStorage.getItem("STUDENT_ID") || "S101";
+
+  try {
+    const res = await fetch(`http://localhost:5000/download/courses/${encodeURIComponent(studentId)}`);
+
+    if (!res.ok) {
+      alert("Error downloading PDF");
+      return;
+    }
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "Courses.pdf";
+    a.click();
+    a.remove();
+
+  } catch (err) {
+    console.error(err);
+    alert("Failed to download PDF");
+  }
+}
+</script>
+
+</body>
+</html>

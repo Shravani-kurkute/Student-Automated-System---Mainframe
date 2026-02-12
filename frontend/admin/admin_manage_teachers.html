@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Manage Teachers | Student Automated System</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f0f4f8;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background: #212529;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      font-size: 1.4rem;
+    }
+
+    header a {
+      color: #fff;
+      text-decoration: none;
+      background: #4c6ef5;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+    }
+
+    .container {
+      padding: 2rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .container h2 {
+      text-align: center;
+      margin-bottom: 1rem;
+      color: #333;
+    }
+
+    /* ==== TABLE ==== */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 0.8rem 1rem;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background: #4c6ef5;
+      color: #fff;
+    }
+
+    tr:hover {
+      background: #f8f9fa;
+    }
+
+    /* ==== BUTTONS ==== */
+    .btn {
+      padding: 0.4rem 0.8rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      color: white;
+    }
+
+    .btn-edit {
+      background: #15aabf;
+    }
+
+    .btn-delete {
+      background: #fa5252;
+    }
+
+    .btn-add {
+      background: #51cf66;
+      display: block;
+      margin: 0 auto 1rem auto;
+    }
+
+    /* ==== MODAL ==== */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      width: 400px;
+    }
+
+    .modal-content h3 {
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .modal-content input {
+      width: 100%;
+      padding: 0.6rem;
+      margin-bottom: 0.8rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .save-btn {
+      background: #4c6ef5;
+      border: none;
+      color: white;
+      border-radius: 6px;
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+    }
+
+    .cancel-btn {
+      background: #868e96;
+      border: none;
+      color: white;
+      border-radius: 6px;
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Admin Panel - Manage Teachers</h1>
+    <a href="admin_dashboard.html">⬅ Back to Dashboard</a>
+  </header>
+
+  <div class="container">
+    <h2>Teacher Records</h2>
+    <button class="btn btn-add" onclick="openModal()">+ Add Teacher</button>
+
+    <table id="teacherTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Department</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Filled dynamically -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MODAL FOR ADD / EDIT -->
+  <div class="modal" id="teacherModal">
+    <div class="modal-content">
+      <h3 id="modalTitle">Add Teacher</h3>
+      <input type="text" id="teacherName" placeholder="Full Name">
+      <input type="email" id="teacherEmail" placeholder="Email">
+      <input type="text" id="teacherDept" placeholder="Department">
+      <div class="modal-actions">
+        <button class="save-btn" onclick="saveTeacher()">Save</button>
+        <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let teachers = [
+      { id: 1, name: "Prof. Anjali Verma", email: "anjali.verma@example.com", dept: "Computer Science" },
+      { id: 2, name: "Dr. Rajesh Patel", email: "rajesh.patel@example.com", dept: "Mathematics" },
+      { id: 3, name: "Mr. Sameer Khan", email: "sameer.khan@example.com", dept: "Physics" }
+    ];
+
+    let editId = null;
+
+    function renderTable() {
+      const tbody = document.querySelector("#teacherTable tbody");
+      tbody.innerHTML = "";
+      teachers.forEach((t) => {
+        const row = `
+          <tr>
+            <td>${t.id}</td>
+            <td>${t.name}</td>
+            <td>${t.email}</td>
+            <td>${t.dept}</td>
+            <td>
+              <button class="btn btn-edit" onclick="editTeacher(${t.id})">Edit</button>
+              <button class="btn btn-delete" onclick="deleteTeacher(${t.id})">Delete</button>
+            </td>
+          </tr>`;
+        tbody.innerHTML += row;
+      });
+    }
+
+    function openModal(editMode = false) {
+      document.getElementById('teacherModal').style.display = 'flex';
+      document.getElementById('modalTitle').textContent = editMode ? 'Edit Teacher' : 'Add Teacher';
+    }
+
+    function closeModal() {
+      document.getElementById('teacherModal').style.display = 'none';
+      document.getElementById('teacherName').value = '';
+      document.getElementById('teacherEmail').value = '';
+      document.getElementById('teacherDept').value = '';
+      editId = null;
+    }
+
+    function saveTeacher() {
+      const name = document.getElementById('teacherName').value.trim();
+      const email = document.getElementById('teacherEmail').value.trim();
+      const dept = document.getElementById('teacherDept').value.trim();
+
+      if (!name || !email || !dept) {
+        alert("Please fill all fields!");
+        return;
+      }
+
+      if (editId) {
+        const teacher = teachers.find(t => t.id === editId);
+        teacher.name = name;
+        teacher.email = email;
+        teacher.dept = dept;
+      } else {
+        const newId = teachers.length ? teachers[teachers.length - 1].id + 1 : 1;
+        teachers.push({ id: newId, name, email, dept });
+      }
+
+      closeModal();
+      renderTable();
+    }
+
+    function editTeacher(id) {
+      const teacher = teachers.find(t => t.id === id);
+      if (!teacher) return;
+
+      document.getElementById('teacherName').value = teacher.name;
+      document.getElementById('teacherEmail').value = teacher.email;
+      document.getElementById('teacherDept').value = teacher.dept;
+      editId = id;
+      openModal(true);
+    }
+
+    function deleteTeacher(id) {
+      if (confirm("Are you sure you want to delete this teacher?")) {
+        teachers = teachers.filter(t => t.id !== id);
+        renderTable();
+      }
+    }
+
+    renderTable();
+  </script>
+</body>
+</html>

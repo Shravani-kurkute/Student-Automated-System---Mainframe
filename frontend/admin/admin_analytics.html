@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Analytics | SAS</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+    }
+    header {
+      background: #007bff;
+      color: white;
+      padding: 15px 25px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: 600;
+    }
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      padding: 30px;
+    }
+    .card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      padding: 20px;
+      text-align: center;
+    }
+    .card h3 {
+      color: #007bff;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    .stat {
+      font-size: 26px;
+      font-weight: bold;
+      color: #333;
+    }
+    .charts {
+      width: 90%;
+      max-width: 1200px;
+      margin: 40px auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 30px;
+    }
+    .chart-box {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+    .chart-box h4 {
+      text-align: center;
+      color: #444;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <header>📈 Admin Analytics Dashboard</header>
+
+  <div class="dashboard">
+    <div class="card">
+      <h3>Total Students</h3>
+      <div class="stat" id="totalStudents">-</div>
+    </div>
+    <div class="card">
+      <h3>Total Teachers</h3>
+      <div class="stat" id="totalTeachers">-</div>
+    </div>
+    <div class="card">
+      <h3>Average Attendance</h3>
+      <div class="stat" id="avgAttendance">-</div>
+    </div>
+    <div class="card">
+      <h3>Overall Performance</h3>
+      <div class="stat" id="overallPerformance">-</div>
+    </div>
+  </div>
+
+  <div class="charts">
+    <div class="chart-box">
+      <h4>Department-wise Student Count</h4>
+      <canvas id="deptChart"></canvas>
+    </div>
+    <div class="chart-box">
+      <h4>Performance Distribution</h4>
+      <canvas id="performanceChart"></canvas>
+    </div>
+    <div class="chart-box">
+      <h4>Attendance Ratio</h4>
+      <canvas id="attendanceChart"></canvas>
+    </div>
+    <div class="chart-box">
+      <h4>Monthly New Registrations</h4>
+      <canvas id="registrationChart"></canvas>
+    </div>
+  </div>
+
+  <script>
+    // --- Simulated data (Replace with API data later) ---
+    document.getElementById("totalStudents").textContent = "256";
+    document.getElementById("totalTeachers").textContent = "24";
+    document.getElementById("avgAttendance").textContent = "87%";
+    document.getElementById("overallPerformance").textContent = "B+";
+
+    // Department-wise Chart
+    new Chart(document.getElementById("deptChart"), {
+      type: "bar",
+      data: {
+        labels: ["CSE", "IT", "ECE", "ME", "CIVIL"],
+        datasets: [{
+          label: "Students",
+          data: [70, 55, 50, 45, 36],
+          backgroundColor: ["#007bff", "#17a2b8", "#ffc107", "#28a745", "#6f42c1"]
+        }]
+      },
+      options: {
+        plugins: {
+          legend: { display: false },
+          title: { display: true, text: "Students by Department" }
+        },
+        responsive: true
+      }
+    });
+
+    // Performance Distribution
+    new Chart(document.getElementById("performanceChart"), {
+      type: "pie",
+      data: {
+        labels: ["Excellent", "Good", "Average", "Needs Improvement"],
+        datasets: [{
+          data: [30, 40, 20, 10],
+          backgroundColor: ["#28a745", "#17a2b8", "#ffc107", "#dc3545"]
+        }]
+      },
+      options: {
+        plugins: {
+          title: { display: true, text: "Performance Breakdown" }
+        }
+      }
+    });
+
+    // Attendance Ratio
+    new Chart(document.getElementById("attendanceChart"), {
+      type: "doughnut",
+      data: {
+        labels: ["Present", "Absent"],
+        datasets: [{
+          data: [87, 13],
+          backgroundColor: ["#007bff", "#dc3545"]
+        }]
+      },
+      options: {
+        plugins: {
+          title: { display: true, text: "Attendance Overview" }
+        }
+      }
+    });
+
+    // Monthly Registrations
+    new Chart(document.getElementById("registrationChart"), {
+      type: "line",
+      data: {
+        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
+        datasets: [{
+          label: "New Registrations",
+          data: [5, 12, 9, 15, 18, 22, 20, 25],
+          borderColor: "#007bff",
+          fill: true,
+          backgroundColor: "rgba(0,123,255,0.1)"
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: { display: true, text: "Monthly New Student Registrations" }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

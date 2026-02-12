@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Automated System (SAS)</title>
+  <style>
+    /* === BASIC RESET === */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #4c6ef5, #15aabf);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* === HEADER === */
+    header {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(10px);
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #fff;
+    }
+
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      margin-left: 1.5rem;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+
+    nav a:hover {
+      color: #ffe066;
+    }
+
+    /* === MAIN CONTENT === */
+    .hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .hero h1 {
+      font-size: 2.8rem;
+      margin-bottom: 1rem;
+      letter-spacing: 1px;
+    }
+
+    .hero p {
+      font-size: 1.1rem;
+      max-width: 600px;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+      color: #f8f9fa;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .btn {
+      background: #fff;
+      color: #4c6ef5;
+      padding: 0.8rem 1.6rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      background: #364fc7;
+      color: #fff;
+    }
+
+    /* === FEATURES SECTION === */
+    .features {
+      background: #fff;
+      color: #333;
+      padding: 3rem 2rem;
+      text-align: center;
+    }
+
+    .features h2 {
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+      color: #364fc7;
+    }
+
+    .features .cards {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 1.5rem;
+    }
+
+    .card {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 1.5rem;
+      width: 280px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+      transition: 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    }
+
+    .card h3 {
+      color: #4c6ef5;
+      margin-bottom: 0.8rem;
+    }
+
+    /* === FOOTER === */
+    footer {
+      background: rgba(255,255,255,0.1);
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.9rem;
+      color: #f1f3f5;
+    }
+
+    @media(max-width: 768px) {
+      .hero h1 {
+        font-size: 2.2rem;
+      }
+
+      .features .cards {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header>
+    <div class="logo">🎓 SAS Portal</div>
+    <nav>
+      <a href="#features">Features</a>
+      <a href="#about">About</a>
+      <a href="login.html">Login</a>
+    </nav>
+  </header>
+
+  <!-- ===== HERO SECTION ===== -->
+  <section class="hero">
+    <h1>Welcome to Student Automated System</h1>
+    <p>
+      A unified platform for managing student records, performance analytics, 
+      attendance tracking, and academic communication — all in one place.
+    </p>
+    <div class="btn-group">
+      <a href="login.html" class="btn">Login</a>
+      <a href="#features" class="btn">Explore Features</a>
+    </div>
+  </section>
+
+  <!-- ===== FEATURES SECTION ===== -->
+  <section id="features" class="features">
+    <h2>System Highlights</h2>
+    <div class="cards">
+      <div class="card">
+        <h3>Admin Control</h3>
+        <p>Manage students, teachers, and view analytics with complete control and transparency.</p>
+      </div>
+      <div class="card">
+        <h3>Teacher Panel</h3>
+        <p>Enter marks, track attendance, and share important updates with students instantly.</p>
+      </div>
+      <div class="card">
+        <h3>Student Access</h3>
+        <p>View grades, attendance records, and notices — all from your personal dashboard.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    © 2025 Student Automated System
+  </footer>
+
+  <script>
+    // Simple fade-in animation
+    document.addEventListener("DOMContentLoaded", () => {
+      document.body.style.opacity = 0;
+      setTimeout(() => { document.body.style.transition = "opacity 1s"; document.body.style.opacity = 1; }, 100);
+    });
+  </script>
+</body>
+</html>

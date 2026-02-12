@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teacher - Performance | SAS</title>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      background: #f4f6fb;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #4c6ef5;
+      color: #fff;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+
+    .logo {
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+
+    .nav-links a {
+      color: #fff;
+      text-decoration: none;
+      margin-left: 1.5rem;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: #ffe066;
+    }
+
+    main {
+      flex: 1;
+      padding: 2rem;
+      max-width: 1100px;
+      margin: 2rem auto;
+    }
+
+    h2 {
+      text-align: center;
+      color: #364fc7;
+      margin-bottom: 2rem;
+    }
+
+    .chart-section {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 2rem;
+    }
+
+    .chart-box {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      padding: 1.5rem;
+    }
+
+    .chart-box h3 {
+      text-align: center;
+      color: #364fc7;
+      margin-bottom: 1rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      color: #777;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      main {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ===== HEADER ===== -->
+  <header>
+    <div class="logo">👩‍🏫 SAS - Performance</div>
+    <div class="nav-links">
+      <a href="teacher_dashboard.html">Dashboard</a>
+      <a href="teacher_marks.html">Marks</a>
+      <a href="teacher_attendance.html">Attendance</a>
+      <a href="teacher_performance.html">Performance</a>
+      <a href="index.html">Logout</a>
+    </div>
+  </header>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main>
+    <h2>Student Performance Overview</h2>
+
+    <div class="chart-section">
+      <!-- Average Marks Chart -->
+      <div class="chart-box">
+        <h3>Average Marks by Subject</h3>
+        <canvas id="marksChart" height="180"></canvas>
+      </div>
+
+      <!-- Attendance Chart -->
+      <div class="chart-box">
+        <h3>Attendance Percentage</h3>
+        <canvas id="attendanceChart" height="180"></canvas>
+      </div>
+
+      <!-- Performance Comparison -->
+      <div class="chart-box">
+        <h3>Marks vs Attendance (Top Students)</h3>
+        <canvas id="comparisonChart" height="180"></canvas>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    © 2025 Student Automated System | Teacher Performance
+  </footer>
+
+  <script>
+    // ====== Marks Chart ======
+    const marksCtx = document.getElementById("marksChart").getContext("2d");
+    new Chart(marksCtx, {
+      type: "bar",
+      data: {
+        labels: ["DBMS", "OS", "Web Tech", "Java", "AI"],
+        datasets: [{
+          label: "Average Marks",
+          data: [82, 76, 88, 91, 79],
+          backgroundColor: "#4c6ef5",
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: { beginAtZero: true, max: 100 }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    // ====== Attendance Chart ======
+    const attendanceCtx = document.getElementById("attendanceChart").getContext("2d");
+    new Chart(attendanceCtx, {
+      type: "pie",
+      data: {
+        labels: ["Present", "Absent"],
+        datasets: [{
+          data: [90, 10],
+          backgroundColor: ["#51cf66", "#adb5bd"]
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: "bottom" } }
+      }
+    });
+
+    // ====== Comparison Chart ======
+    const comparisonCtx = document.getElementById("comparisonChart").getContext("2d");
+    new Chart(comparisonCtx, {
+      type: "line",
+      data: {
+        labels: ["Riya", "Arjun", "Sneha", "Karan", "Aditi"],
+        datasets: [
+          {
+            label: "Marks (%)",
+            data: [88, 75, 92, 81, 95],
+            borderColor: "#4c6ef5",
+            fill: false,
+            tension: 0.3
+          },
+          {
+            label: "Attendance (%)",
+            data: [95, 82, 89, 77, 92],
+            borderColor: "#82c91e",
+            fill: false,
+            tension: 0.3
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: "bottom" } },
+        scales: { y: { beginAtZero: true, max: 100 } }
+      }
+    });
+  </script>
+</body>
+</html>

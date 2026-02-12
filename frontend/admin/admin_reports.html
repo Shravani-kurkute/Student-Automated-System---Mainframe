@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Reports | SAS</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      background-color: #f4f6fa;
+      font-family: 'Poppins', sans-serif;
+    }
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 30px auto;
+      background: white;
+      border-radius: 10px;
+      padding: 20px 30px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #2c3e50;
+      text-align: center;
+    }
+    .filter-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      margin: 20px 0;
+      background: #eef2f5;
+      padding: 15px;
+      border-radius: 8px;
+    }
+    .filter-section select, .filter-section input {
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-right: 10px;
+    }
+    .filter-section button {
+      background: #007bff;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .filter-section button:hover {
+      background: #0056b3;
+    }
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    .report-table th, .report-table td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+    .report-table th {
+      background: #007bff;
+      color: white;
+    }
+    #chartContainer {
+      margin-top: 30px;
+    }
+    canvas {
+      max-width: 100%;
+    }
+    .download-btn {
+      display: inline-block;
+      margin-top: 20px;
+      background: #28a745;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+    }
+    .download-btn:hover {
+      background: #218838;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📊 Reports & Analytics</h2>
+
+    <div class="filter-section">
+      <div>
+        <label for="reportType">Report Type:</label>
+        <select id="reportType">
+          <option value="studentPerformance">Student Performance</option>
+          <option value="attendanceSummary">Attendance Summary</option>
+          <option value="teacherActivity">Teacher Activity</option>
+        </select>
+
+        <label for="semester">Semester:</label>
+        <select id="semester">
+          <option value="all">All</option>
+          <option value="sem1">Sem 1</option>
+          <option value="sem2">Sem 2</option>
+          <option value="sem3">Sem 3</option>
+        </select>
+      </div>
+
+      <div>
+        <input type="text" id="search" placeholder="Search by name or ID">
+        <button onclick="generateReport()">Generate</button>
+      </div>
+    </div>
+
+    <table class="report-table" id="reportTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Data</th>
+          <th>Remarks</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="5">Click “Generate” to view report data.</td></tr>
+      </tbody>
+    </table>
+
+    <div id="chartContainer">
+      <canvas id="reportChart"></canvas>
+    </div>
+
+    <a href="#" class="download-btn" onclick="downloadReport()">⬇️ Download Report</a>
+  </div>
+
+  <script>
+    function generateReport() {
+      const tbody = document.querySelector("#reportTable tbody");
+      tbody.innerHTML = `
+        <tr>
+          <td>ST101</td>
+          <td>Riya Sharma</td>
+          <td>Performance</td>
+          <td>82%</td>
+          <td>Good Progress</td>
+        </tr>
+        <tr>
+          <td>ST102</td>
+          <td>Arjun Patel</td>
+          <td>Performance</td>
+          <td>91%</td>
+          <td>Excellent</td>
+        </tr>
+        <tr>
+          <td>ST103</td>
+          <td>Priya Verma</td>
+          <td>Performance</td>
+          <td>68%</td>
+          <td>Needs Improvement</td>
+        </tr>
+      `;
+
+      // Generate Chart
+      const ctx = document.getElementById("reportChart").getContext("2d");
+      if (window.reportChart) window.reportChart.destroy();
+
+      window.reportChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: ["Riya", "Arjun", "Priya"],
+          datasets: [{
+            label: "Performance %",
+            data: [82, 91, 68],
+            backgroundColor: ["#007bff", "#28a745", "#ffc107"]
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            title: { display: true, text: "Student Performance Overview" }
+          }
+        }
+      });
+    }
+
+    function downloadReport() {
+      alert("Report downloaded successfully (sample).");
+    }
+  </script>
+</body>
+</html>

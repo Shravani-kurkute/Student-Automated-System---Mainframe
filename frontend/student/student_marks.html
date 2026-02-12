@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Student Marks | SAS</title>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
+    body { background: #f4f6fb; color: #333; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: #4c6ef5; color: #fff; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
+    .logo { font-size: 1.5rem; font-weight: 600; }
+    .nav-links { display: flex; align-items: center; gap: 1rem; }
+    .nav-links a { color: #fff; text-decoration: none; font-weight: 500; transition: 0.3s; }
+    .nav-links a:hover { color: #ffe066; }
+
+    .logout-btn {
+      background: #fa5252;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .logout-btn:hover {
+      background: #e03131;
+    }
+
+    main { flex: 1; padding: 2rem; max-width: 1000px; margin: auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    h2 { color: #364fc7; margin-bottom: 1rem; text-align: center; }
+
+    .student-info {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .student-info p {
+      margin: 0;
+      font-weight: 500;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; border-radius: 8px; overflow: hidden; }
+    th, td { border: 1px solid #dee2e6; padding: 0.8rem; text-align: center; font-size: 0.95rem; }
+    th { background: #4c6ef5; color: #fff; font-weight: 600; }
+    tr:nth-child(even) { background: #f8f9fa; }
+    tr:hover { background: #e7f5ff; }
+
+    .summary { margin-top: 2rem; background: #f1f3f5; padding: 1rem; border-radius: 8px; }
+    .summary p { margin-bottom: 0.5rem; font-weight: 500; font-size: 1rem; }
+
+    .chart-container { margin-top: 2rem; background: #f8f9fa; padding: 1.5rem; border-radius: 10px; }
+
+    footer { text-align: center; padding: 1rem; color: #777; font-size: 0.9rem; }
+
+    .download-btn {
+      background: #4c6ef5; color: white; padding: 12px 20px;
+      border: none; border-radius: 8px; cursor: pointer;
+      font-size: 16px; margin-top: 15px; float:right;
+      transition: 0.3s;
+    }
+    .download-btn:hover { background:#364fc7; }
+    .download-btn:disabled { background: #adb5bd; cursor: not-allowed; }
+
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: #4c6ef5;
+    }
+
+    .error {
+      background: #ffe0e0;
+      color: #c92a2a;
+      padding: 1rem;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .refresh-btn {
+      background: #20c997;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-left: 10px;
+      transition: 0.3s;
+    }
+
+    .refresh-btn:hover {
+      background: #12b886;
+    }
+
+    @media (max-width: 768px) {
+      .student-info {
+        flex-direction: column;
+      }
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+  <header>
+    <div class="logo">🎓 SAS - Student Marks</div>
+    <div class="nav-links">
+      <a href="student_dashboard.html">Dashboard</a>
+      <a href="student_marks.html">Marks</a>
+      <a href="student_courses.html">Courses</a>
+      <a href="student_attendance.html">Attendance</a>
+      <button class="logout-btn" onclick="logout()" style="margin: 0;">Logout</button>
+    </div>
+  </header>
+
+  <main>
+    <h2>Marks Report</h2>
+
+    <div class="student-info" id="studentInfo" style="display: none;">
+      <p><strong>Student ID:</strong> <span id="displayStudentId">-</span></p>
+      <p><strong>Name:</strong> <span id="displayStudentName">-</span></p>
+      <p><strong>Department:</strong> <span id="displayDepartment">-</span></p>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <button class="refresh-btn" onclick="loadMarks()">🔄 Refresh Marks</button>
+      <button class="download-btn" id="downloadPdfBtn">⬇️ Download Marks PDF</button>
+    </div>
+
+    <table id="marksTable">
+      <thead>
+        <tr>
+          <th>Course ID</th>
+          <th>Course Name</th>
+          <th>Credits</th>
+          <th>Marks</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="5" class="loading">Loading marks...</td></tr>
+      </tbody>
+    </table>
+
+    <div class="summary">
+      <p><strong>Total Subjects:</strong> <span id="subjectCount">0</span></p>
+      <p><strong>Average Marks:</strong> <span id="avgMarks">--</span>%</p>
+      <p><strong>Final Grade:</strong> <span id="finalGrade">--</span></p>
+      <p><strong>Result:</strong> <span id="result">--</span></p>
+    </div>
+
+    <div class="chart-container">
+      <h3 style="color:#364fc7; text-align:center; margin-bottom:1rem;">Marks Distribution</h3>
+      <canvas id="marksChart" height="120"></canvas>
+    </div>
+  </main>
+
+  <footer>© 2025 Student Automated System | Student Marks Page</footer>
+
+<script>
+  const API_BASE = "http://localhost:5000";
+  let currentMarksData = [];
+  let currentStudent = { id: null, name: null, department: null };
+
+  async function loadMarks() {
+    // Use sessionStorage to match login page
+    const studentId = sessionStorage.getItem("studentId");
+    const studentName = sessionStorage.getItem("studentName");
+    const studentDept = sessionStorage.getItem("studentDepartment");
+    
+    const tableBody = document.querySelector("#marksTable tbody");
+
+    console.log("📊 Loading marks for student:", { studentId, studentName, studentDept });
+
+    if (!studentId) {
+      tableBody.innerHTML = `<tr><td colspan="5" class="error">⚠️ No student logged in. <a href="../index.html">Login here</a></td></tr>`;
+      return;
+    }
+
+    // Store current student info
+    currentStudent.id = studentId;
+    currentStudent.name = studentName || "Student";
+    currentStudent.department = studentDept || "Unknown";
+
+    // Display student info
+    document.getElementById("displayStudentId").textContent = studentId;
+    document.getElementById("displayStudentName").textContent = currentStudent.name;
+    document.getElementById("displayDepartment").textContent = currentStudent.department;
+    document.getElementById("studentInfo").style.display = "flex";
+
+    try {
+      tableBody.innerHTML = '<tr><td colspan="5" class="loading">Loading marks...</td></tr>';
+      
+      const res = await fetch(`${API_BASE}/marks/${studentId}`);
+      
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      
+      const data = await res.json();
+      console.log("✅ Marks data received:", data);
+
+      if (data.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="5">No marks found. Your teacher hasn't assigned marks yet.</td></tr>`;
+        return;
+      }
+
+      currentMarksData = data.map(r => ({
+        COURSE_ID: r.COURSE_ID,
+        COURSE_NAME: r.COURSE_NAME,
+        CREDITS: r.CREDITS,
+        MARKS: r.MARKS
+      }));
+
+      let total = 0;
+      tableBody.innerHTML = currentMarksData.map(row => {
+        const marks = Number(row.MARKS);
+        total += marks;
+        const isPassing = marks >= 40;
+
+        return `
+          <tr>
+            <td>${row.COURSE_ID}</td>
+            <td>${row.COURSE_NAME}</td>
+            <td>${row.CREDITS}</td>
+            <td><strong style="font-size: 1.1rem;">${marks}</strong></td>
+            <td style="color: ${isPassing ? '#2b8a3e' : '#c92a2a'}; font-weight: 600;">
+              ${isPassing ? '✅ Pass' : '❌ Fail'}
+            </td>
+          </tr>`;
+      }).join("");
+
+      const avg = (total / currentMarksData.length).toFixed(2);
+      const grade = avg >= 85 ? "A" : avg >= 70 ? "B" : avg >= 40 ? "C" : "F";
+      const isPassed = avg >= 40;
+
+      document.getElementById("subjectCount").textContent = currentMarksData.length;
+      document.getElementById("avgMarks").textContent = avg;
+      document.getElementById("finalGrade").textContent = grade;
+      document.getElementById("result").textContent = isPassed ? "Passed ✅" : "Failed ❌";
+      document.getElementById("result").style.color = isPassed ? "#2b8a3e" : "#c92a2a";
+
+      // Draw chart
+      drawChart();
+
+      console.log("✅ Marks loaded successfully");
+
+    } catch (err) {
+      console.error("❌ Error loading marks:", err);
+      tableBody.innerHTML = `<tr><td colspan="5" class="error">⚠️ Unable to load marks: ${err.message}</td></tr>`;
+    }
+  }
+
+  function drawChart() {
+    const ctx = document.getElementById("marksChart").getContext("2d");
+    if (window._marksChart) window._marksChart.destroy();
+
+    window._marksChart = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: currentMarksData.map(d => d.COURSE_NAME),
+        datasets: [{
+          label: "Marks",
+          data: currentMarksData.map(d => d.MARKS),
+          backgroundColor: currentMarksData.map(d => d.MARKS >= 40 ? "#4c6ef5" : "#fa5252"),
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { 
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return `Marks: ${context.parsed.y}/100`;
+              }
+            }
+          }
+        },
+        scales: { 
+          y: { 
+            beginAtZero: true, 
+            max: 100,
+            ticks: {
+              stepSize: 20
+            }
+          } 
+        }
+      }
+    });
+  }
+
+  // Download PDF function
+  document.getElementById("downloadPdfBtn").addEventListener("click", async () => {
+    if (currentMarksData.length === 0) {
+      alert("⚠️ No marks data to download");
+      return;
+    }
+
+    const btn = document.getElementById("downloadPdfBtn");
+    btn.disabled = true;
+    btn.textContent = "📥 Generating PDF...";
+
+    try {
+      const canvas = document.getElementById("marksChart");
+      const chartImage = canvas.toDataURL("image/png");
+
+      const avg = document.getElementById("avgMarks").textContent;
+      const grade = document.getElementById("finalGrade").textContent;
+      const result = document.getElementById("result").textContent;
+
+      const payload = {
+        studentId: currentStudent.id,
+        studentName: currentStudent.name,
+        department: currentStudent.department,
+        marks: currentMarksData,
+        avg: avg,
+        grade: grade,
+        result: result,
+        chartImage: chartImage
+      };
+
+      const res = await fetch(`${API_BASE}/download/marks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) throw new Error("Failed to generate PDF");
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `marks_${currentStudent.id}_${new Date().toISOString().split('T')[0]}.pdf`;
+      a.click();
+
+      URL.revokeObjectURL(url);
+      console.log("✅ PDF downloaded successfully");
+
+    } catch (error) {
+      console.error("❌ Error generating PDF:", error);
+      alert("❌ Failed to generate PDF: " + error.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "⬇️ Download Marks PDF";
+    }
+  });
+
+  function logout() {
+    if (confirm("Are you sure you want to logout?")) {
+      sessionStorage.clear();
+      window.location.href = "../index.html";
+    }
+  }
+
+  // Auto-refresh marks every 30 seconds to see teacher updates
+  setInterval(() => {
+    console.log("🔄 Auto-refreshing marks...");
+    loadMarks();
+  }, 30000); // 30 seconds
+
+  // Load marks when page loads
+  loadMarks();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Settings | SAS</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
+    body { background: #f4f6fb; color: #333; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: #4c6ef5; color: #fff; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .logo { font-size: 1.5rem; font-weight: 600; }
+    .logout-btn { background: #fff; color: #4c6ef5; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; font-weight: 600; transition: 0.3s; }
+    .logout-btn:hover { background: #364fc7; color: #fff; }
+    .dashboard { flex: 1; display: flex; padding: 2rem; gap: 2rem; }
+    .sidebar { width: 250px; background: #fff; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    .sidebar h3 { color: #364fc7; margin-bottom: 1rem; border-bottom: 2px solid #dee2e6; padding-bottom: 0.5rem; }
+    .sidebar ul { list-style: none; }
+    .sidebar a { text-decoration: none; color: inherit; display: block; }
+    .sidebar li { padding: 0.6rem 0; cursor: pointer; transition: 0.3s; }
+    .sidebar li:hover { color: #4c6ef5; font-weight: 600; }
+    .main-content { flex: 1; background: #fff; border-radius: 12px; padding: 2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    h2 { color: #364fc7; margin-bottom: 1.5rem; }
+    .settings-section { margin-bottom: 2rem; }
+    .settings-section h3 { color: #4c6ef5; margin-bottom: 1rem; }
+    form { display: flex; flex-direction: column; gap: 1rem; max-width: 500px; }
+    label { font-weight: 500; color: #444; }
+    input, select { padding: 0.7rem; border: 1px solid #ccc; border-radius: 8px; outline: none; transition: 0.3s; }
+    input:focus, select:focus { border-color: #4c6ef5; box-shadow: 0 0 4px rgba(76,110,245,0.4); }
+    button { background: #4c6ef5; color: #fff; border: none; padding: 0.8rem; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; }
+    button:hover { background: #364fc7; }
+    .status-msg { margin-top: 1rem; font-weight: 500; }
+    footer { text-align: center; padding: 1rem; color: #777; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">🎓 SAS - Student Settings</div>
+    <a href="../login.html" class="logout-btn" onclick="logout()">Logout</a>
+  </header>
+
+  <div class="dashboard">
+    <div class="sidebar">
+      <h3>Menu</h3>
+      <ul>
+        <li><a href="/student/dashboard">🏠 Dashboard</a></li>
+        <li><a href="/student/courses">📚 Courses</a></li>
+        <li><a href="/student/marks">🧾 Marks</a></li>
+        <li><a href="/student/performance">📊 Performance</a></li>
+        <li><a href="/student/attendance">📅 Attendance</a></li>
+        <li><a href="/student/notices">📢 Notices</a></li>
+        <li><a href="/student/settings">⚙️ Settings</a></li>
+        <li><a href="/student/profile">👤 Profile</a></li>
+      </ul>
+    </div>
+
+    <div class="main-content">
+      <h2>Account Settings</h2>
+
+      <div class="settings-section">
+        <h3>👤 Update Profile</h3>
+        <form id="profileForm">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" placeholder="Enter your name" required />
+
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="Enter your email" required />
+
+          <label for="department">Department</label>
+          <select id="department" required>
+            <option value="">-- Select Department --</option>
+            <option value="CSE">Computer Science</option>
+            <option value="IT">Information Technology</option>
+            <option value="MECH">Mechanical</option>
+            <option value="ENTC">Electronics & Telecomm</option>
+          </select>
+
+          <button type="submit">Save Changes</button>
+          <p id="profileMsg" class="status-msg"></p>
+        </form>
+      </div>
+
+      <div class="settings-section">
+        <h3>🔒 Change Password</h3>
+        <form id="passwordForm">
+          <label for="currentPwd">Current Password</label>
+          <input type="password" id="currentPwd" placeholder="Enter current password" required />
+
+          <label for="newPwd">New Password</label>
+          <input type="password" id="newPwd" placeholder="Enter new password" required />
+
+          <button type="submit">Update Password</button>
+          <p id="pwdMsg" class="status-msg"></p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <footer>© 2025 Student Automated System | Settings</footer>
+
+  <script>
+    const studentId = localStorage.getItem("STUDENT_ID");
+
+    // Prefill profile details (dummy or later fetch from backend)
+    async function loadProfile() {
+      try {
+        const res = await fetch(`http://localhost:5000/students/${studentId}`);
+        if (!res.ok) throw new Error("Failed to load profile");
+        const student = await res.json();
+        document.getElementById("name").value = student.NAME;
+        document.getElementById("email").value = student.EMAIL;
+        document.getElementById("department").value = student.DEPARTMENT;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // Update profile
+    document.getElementById("profileForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const department = document.getElementById("department").value;
+      const msg = document.getElementById("profileMsg");
+
+      msg.textContent = "⏳ Updating profile...";
+      msg.style.color = "gray";
+
+      try {
+        const res = await fetch(`http://localhost:5000/students/${studentId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, department }),
+        });
+        if (!res.ok) throw new Error("Update failed");
+        msg.textContent = "✅ Profile updated successfully!";
+        msg.style.color = "green";
+      } catch (err) {
+        msg.textContent = "❌ Error updating profile.";
+        msg.style.color = "red";
+      }
+    });
+
+    // Change password
+    document.getElementById("passwordForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const currentPwd = document.getElementById("currentPwd").value.trim();
+      const newPwd = document.getElementById("newPwd").value.trim();
+      const msg = document.getElementById("pwdMsg");
+
+      msg.textContent = "⏳ Updating password...";
+      msg.style.color = "gray";
+
+      try {
+        const res = await fetch(`http://localhost:5000/students/${studentId}/password`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ currentPwd, newPwd }),
+        });
+        if (!res.ok) throw new Error("Password update failed");
+        msg.textContent = "✅ Password changed successfully!";
+        msg.style.color = "green";
+      } catch (err) {
+        msg.textContent = "❌ Error changing password.";
+        msg.style.color = "red";
+      }
+    });
+
+    function logout() {
+      localStorage.removeItem("STUDENT_ID");
+      window.location.href = "../login.html";
+    }
+
+    loadProfile();
+  </script>
+</body>
+</html>

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Timetable | SAS</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Poppins", sans-serif;
+        }
+
+        body {
+            background: #f4f6fb;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: #4c6ef5;
+            color: #fff;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #ffe066;
+        }
+
+        .logout-btn {
+            background: #fa5252;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            color: #fff;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #e03131;
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 2rem auto;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #364fc7;
+            margin-bottom: 1rem;
+        }
+
+        .student-info {
+            background: #fff;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .student-info p {
+            margin: 0.3rem 0;
+            font-weight: 500;
+        }
+
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #4c6ef5;
+            font-size: 1.1rem;
+        }
+
+        .error {
+            background: #ffe0e0;
+            color: #c92a2a;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th, td {
+            border: 1px solid #dee2e6;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        th {
+            background-color: #4c6ef5;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        tr:hover {
+            background-color: #e7f5ff;
+        }
+
+        .day-column {
+            font-weight: 600;
+            color: #364fc7;
+            background-color: #f1f3f5;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem;
+            color: #777;
+            font-size: 0.9rem;
+        }
+
+        #msg {
+            text-align: center;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+        }
+
+        .msg-error {
+            background: #ffe0e0;
+            color: #c92a2a;
+        }
+
+        .msg-info {
+            background: #d0ebff;
+            color: #1971c2;
+        }
+
+        @media (max-width: 768px) {
+            main {
+                padding: 1rem;
+            }
+            
+            table {
+                font-size: 0.85rem;
+            }
+            
+            th, td {
+                padding: 0.6rem 0.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">🎓 SAS - My Timetable</div>
+        <div class="nav-links">
+            <a href="student_dashboard.html">Dashboard</a>
+            <a href="student_courses.html">Courses</a>
+            <a href="student_marks.html">Marks</a>
+            <a href="student_timetable.html">Timetable</a>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </header>
+
+    <main>
+        <h1>📅 Your Weekly Timetable</h1>
+
+        <div class="student-info" id="studentInfo" style="display: none;">
+            <p><strong>Student ID:</strong> <span id="displayStudentId">-</span></p>
+            <p><strong>Name:</strong> <span id="displayStudentName">-</span></p>
+            <p><strong>Department:</strong> <span id="displayDepartment">-</span></p>
+        </div>
+
+        <div class="container">
+            <div id="msg"></div>
+            <div id="loadingMessage" class="loading">Loading timetable...</div>
+
+            <div id="timetableContent" style="display: none;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Day</th>
+                            <th>Time</th>
+                            <th>Course</th>
+                            <th>Room</th>
+                            <th>Faculty</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        © 2025 Student Automated System | Student Timetable
+    </footer>
+
+    <script>
+        const API_BASE = "http://localhost:5000";
+
+        // Get student data from sessionStorage
+        const studentId = sessionStorage.getItem("studentId");
+        const studentName = sessionStorage.getItem("studentName");
+        const studentDept = sessionStorage.getItem("studentDepartment");
+
+        console.log("📅 Timetable loading for student:", { studentId, studentName, studentDept });
+
+        if (!studentId) {
+            showMessage("⚠️ No student logged in. Redirecting to login...", "error");
+            setTimeout(() => {
+                window.location.href = "../index.html";
+            }, 2000);
+        } else {
+            loadTimetable();
+        }
+
+        function showMessage(text, type = "info") {
+            const msgDiv = document.getElementById("msg");
+            msgDiv.textContent = text;
+            msgDiv.className = type === "error" ? "msg-error" : "msg-info";
+            msgDiv.style.display = "block";
+        }
+
+        async function loadTimetable() {
+            try {
+                // Display student info
+                document.getElementById("displayStudentId").textContent = studentId;
+                document.getElementById("displayStudentName").textContent = studentName || "Student";
+                document.getElementById("displayDepartment").textContent = studentDept || "Unknown";
+                document.getElementById("studentInfo").style.display = "block";
+
+                console.log("🔍 Fetching timetable from:", `${API_BASE}/timetable/${studentId}`);
+
+                const res = await fetch(`${API_BASE}/timetable/${studentId}`);
+                
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                
+                const data = await res.json();
+                console.log("✅ Timetable data received:", data);
+
+                const tableBody = document.getElementById("table-body");
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="5" style="padding: 2rem; color: #868e96;">
+                                No timetable available for your department yet.
+                                <br><br>
+                                <small>Department: ${studentDept || 'Unknown'}</small>
+                            </td>
+                        </tr>
+                    `;
+                    document.getElementById("loadingMessage").style.display = "none";
+                    document.getElementById("timetableContent").style.display = "block";
+                    return;
+                }
+
+                // Group timetable by day for better organization
+                const daysOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+                const groupedByDay = {};
+
+                data.forEach(item => {
+                    const day = item.DAY.trim();
+                    if (!groupedByDay[day]) {
+                        groupedByDay[day] = [];
+                    }
+                    groupedByDay[day].push(item);
+                });
+
+                // Sort each day's entries by time
+                Object.keys(groupedByDay).forEach(day => {
+                    groupedByDay[day].sort((a, b) => {
+                        return a.TIME_SLOT.localeCompare(b.TIME_SLOT);
+                    });
+                });
+
+                // Build table rows
+                let rows = "";
+
+                daysOrder.forEach(day => {
+                    if (groupedByDay[day]) {
+                        groupedByDay[day].forEach((item, index) => {
+                            rows += `
+                                <tr>
+                                    ${index === 0 ? `<td class="day-column" rowspan="${groupedByDay[day].length}">${day}</td>` : ''}
+                                    <td><strong>${item.TIME_SLOT}</strong></td>
+                                    <td>${item.COURSE_NAME}</td>
+                                    <td>${item.ROOM}</td>
+                                    <td>${item.FACULTY_NAME}</td>
+                                </tr>
+                            `;
+                        });
+                    }
+                });
+
+                tableBody.innerHTML = rows;
+
+                // Hide loading, show content
+                document.getElementById("loadingMessage").style.display = "none";
+                document.getElementById("timetableContent").style.display = "block";
+
+                console.log("✅ Timetable displayed successfully");
+
+            } catch (err) {
+                console.error("❌ Error loading timetable:", err);
+                
+                document.getElementById("loadingMessage").style.display = "none";
+                document.getElementById("msg").innerHTML = `
+                    ❌ Failed to load timetable: ${err.message}
+                    <br><small>Please check if the server is running on port 5000</small>
+                `;
+                document.getElementById("msg").className = "msg-error";
+                document.getElementById("msg").style.display = "block";
+            }
+        }
+
+        function logout() {
+            if (confirm("Are you sure you want to logout?")) {
+                sessionStorage.clear();
+                localStorage.clear();
+                window.location.href = "../index.html";
+            }
+        }
+    </script>
+
+</body>
+</html>
